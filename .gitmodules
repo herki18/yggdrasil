@@ -4,3 +4,6 @@
 [submodule "repos/scripting-engine-rust"]
 	path = repos/scripting-engine-rust
 	url = https://github.com/herki18/scripting-engine-rust
+[submodule "repos/sunderia"]
+	path = repos/sunderia
+	url = https://github.com/herki18/sunderia
