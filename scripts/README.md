@@ -30,3 +30,17 @@ Shortcut:
 ```cmd
 scripts\build-ffi.cmd --profile release
 ```
+
+## build-ffi-all.sh (WSL-friendly)
+Runs Linux and/or Windows builds from WSL.
+
+Usage:
+```bash
+./scripts/build-ffi-all.sh --profile release
+./scripts/build-ffi-all.sh --linux
+./scripts/build-ffi-all.sh --windows
+```
+
+Notes:
+- Windows build uses `powershell.exe` and requires WSL interop.
+- If `powershell.exe` is not available, run `scripts/build-ffi.ps1` directly on Windows.
