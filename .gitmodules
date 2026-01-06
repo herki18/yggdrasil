@@ -7,3 +7,12 @@
 [submodule "repos/sunderia"]
 	path = repos/sunderia
 	url = https://github.com/herki18/sunderia
+[submodule "repos/scripting-engine-unity"]
+	path = repos/scripting-engine-unity
+	url = https://github.com/herki18/scripting-engine-unity
+[submodule "repos/web-engine-unity"]
+	path = repos/web-engine-unity
+	url = https://github.com/herki18/web-engine-unity
+[submodule "repos/web-scripting-bridge-unity"]
+	path = repos/web-scripting-bridge-unity
+	url = https://github.com/herki18/web-scripting-bridge-unity
