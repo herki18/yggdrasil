@@ -17,6 +17,17 @@ Notes:
   - `repos/web-engine-unity/Runtime/Plugins/<Platform>/<Arch>/`
 - For cross-compilation, you must install the appropriate Rust target and toolchain.
 
+Output layout (platform-specific):
+- Windows x86_64:
+  - `Runtime/Plugins/Windows/x86_64/se_ffi.dll`
+  - `Runtime/Plugins/Windows/x86_64/webr_engine.dll`
+- Linux x86_64:
+  - `Runtime/Plugins/Linux/x86_64/libse_ffi.so`
+  - `Runtime/Plugins/Linux/x86_64/libwebr_engine.so`
+- macOS arm64:
+  - `Runtime/Plugins/macOS/arm64/libse_ffi.dylib`
+  - `Runtime/Plugins/macOS/arm64/libwebr_engine.dylib`
+
 ## build-ffi.ps1 (Windows)
 PowerShell wrapper for Windows builds.
 
