@@ -1,0 +1,6 @@
+[submodule "repos/web-engine-rust"]
+	path = repos/web-engine-rust
+	url = https://github.com/herki18/web-engine-rust
+[submodule "repos/scripting-engine-rust"]
+	path = repos/scripting-engine-rust
+	url = https://github.com/herki18/scripting-engine-rust
