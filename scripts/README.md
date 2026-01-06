@@ -16,3 +16,17 @@ Notes:
   - `repos/scripting-engine-unity/Runtime/Plugins/<Platform>/<Arch>/`
   - `repos/web-engine-unity/Runtime/Plugins/<Platform>/<Arch>/`
 - For cross-compilation, you must install the appropriate Rust target and toolchain.
+
+## build-ffi.ps1 (Windows)
+PowerShell wrapper for Windows builds.
+
+Usage:
+```powershell
+.\scripts\build-ffi.ps1 -Profile release
+.\scripts\build-ffi.ps1 -Targets x86_64-pc-windows-msvc,x86_64-unknown-linux-gnu
+```
+
+Shortcut:
+```cmd
+scripts\build-ffi.cmd --profile release
+```
