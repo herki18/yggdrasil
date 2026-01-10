@@ -1,5 +1,5 @@
 param(
-  [ValidateSet('debug','release')]
+  [ValidateSet('debug','release','all')]
   [string]$Profile = 'debug',
   [string]$Target,
   [string]$Targets
@@ -58,46 +58,57 @@ if ($Target) { $targetList += $Target }
 if ($Targets) { $targetList += $Targets.Split(',') }
 if ($targetList.Count -eq 0) { $targetList = @(Get-HostTriple) }
 
-$cargoProfileArgs = @()
-$profileDir = $Profile
-if ($Profile -eq 'release') { $cargoProfileArgs += '--release' }
+$profiles = @()
+if ($Profile -eq 'all') {
+  $profiles = @('debug','release')
+} else {
+  $profiles = @($Profile)
+}
 
-foreach ($t in $targetList) {
-  $platform = Get-Platform $t
-  $arch = Get-Arch $t
-  $ext = Get-Ext $t
-  $prefix = Get-Prefix $t
+foreach ($p in $profiles) {
+  $cargoProfileArgs = @()
+  $profileDir = $p
+  if ($p -eq 'release') { $cargoProfileArgs += '--release' }
 
-  if (-not $platform -or -not $ext) { throw "Unsupported target: $t" }
+  foreach ($t in $targetList) {
+    $platform = Get-Platform $t
+    $arch = Get-Arch $t
+    $ext = Get-Ext $t
+    $prefix = Get-Prefix $t
 
-  Write-Host "== Building for $t ($platform/$arch) [$Profile] =="
+    if (-not $platform -or -not $ext) { throw "Unsupported target: $t" }
 
-  Push-Location $seDir
-  & cargo build -p se-ffi --target $t @cargoProfileArgs
-  Pop-Location
+    Write-Host "== Building for $t ($platform/$arch) [$p] =="
 
-  Push-Location $weDir
-  & cargo build -p webr-engine-ffi --target $t @cargoProfileArgs
-  Pop-Location
+    Push-Location $seDir
+    & cargo build -p se-ffi --target $t @cargoProfileArgs
+    Pop-Location
 
-  $seOut = Join-Path $seDir "target/$t/$profileDir/${prefix}se_ffi.$ext"
-  $weOut = Join-Path $weDir "target/$t/$profileDir/${prefix}webr_engine.$ext"
+    Push-Location $weDir
+    & cargo build -p webr-engine-ffi --target $t @cargoProfileArgs
+    Pop-Location
 
-  if (-not (Test-Path $seOut)) { throw "Missing output: $seOut" }
-  if (-not (Test-Path $weOut)) { throw "Missing output: $weOut" }
+    $seOut = Join-Path $seDir "target/$t/$profileDir/${prefix}se_ffi.$ext"
+    $weOut = Join-Path $weDir "target/$t/$profileDir/${prefix}webr_engine.$ext"
 
-  $seDest = Join-Path $sePkg "Runtime/Plugins/$platform/$arch"
-  $weDest = Join-Path $wePkg "Runtime/Plugins/$platform/$arch"
+    if (-not (Test-Path $seOut)) { throw "Missing output: $seOut" }
+    if (-not (Test-Path $weOut)) { throw "Missing output: $weOut" }
 
-  New-Item -ItemType Directory -Force -Path $seDest | Out-Null
-  New-Item -ItemType Directory -Force -Path $weDest | Out-Null
+    $seBase = Join-Path $sePkg "Runtime/Plugins/$platform/$arch"
+    $weBase = Join-Path $wePkg "Runtime/Plugins/$platform/$arch"
+    $seDest = if ($p -eq 'release') { $seBase } else { Join-Path $seBase 'Debug' }
+    $weDest = if ($p -eq 'release') { $weBase } else { Join-Path $weBase 'Debug' }
 
-  Copy-Item $seOut -Destination $seDest -Force
-  Copy-Item $weOut -Destination $weDest -Force
+    New-Item -ItemType Directory -Force -Path $seDest | Out-Null
+    New-Item -ItemType Directory -Force -Path $weDest | Out-Null
 
-  Write-Host "  -> $seDest\$(Split-Path $seOut -Leaf)"
-  Write-Host "  -> $weDest\$(Split-Path $weOut -Leaf)"
-  Write-Host ""
+    Copy-Item $seOut -Destination $seDest -Force
+    Copy-Item $weOut -Destination $weDest -Force
+
+    Write-Host "  -> $seDest\$(Split-Path $seOut -Leaf)"
+    Write-Host "  -> $weDest\$(Split-Path $weOut -Leaf)"
+    Write-Host ""
+  }
 }
 
 Write-Host "Done."

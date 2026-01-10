@@ -12,7 +12,7 @@ TARGETS=()
 
 usage() {
   cat <<USAGE
-Usage: $(basename "$0") [--profile debug|release] [--target <triple> | --targets <t1,t2,...>]
+Usage: $(basename "$0") [--profile debug|release|all] [--target <triple> | --targets <t1,t2,...>]
 
 Builds Rust FFI libs and copies them into the Unity packages under Runtime/Plugins/<Platform>/<Arch>/.
 
@@ -46,15 +46,9 @@ if [[ ${#TARGETS[@]} -eq 0 ]]; then
   TARGETS=("$HOST_TRIPLE")
 fi
 
-if [[ "$PROFILE" != "debug" && "$PROFILE" != "release" ]]; then
-  echo "Invalid profile: $PROFILE (use debug or release)" >&2
+if [[ "$PROFILE" != "debug" && "$PROFILE" != "release" && "$PROFILE" != "all" ]]; then
+  echo "Invalid profile: $PROFILE (use debug, release, or all)" >&2
   exit 1
-fi
-
-PROFILE_DIR="$PROFILE"
-CARGO_PROFILE_ARGS=()
-if [[ "$PROFILE" == "release" ]]; then
-  CARGO_PROFILE_ARGS+=("--release")
 fi
 
 platform_for_target() {
@@ -96,44 +90,64 @@ prefix_for_target() {
   esac
 }
 
-for TARGET in "${TARGETS[@]}"; do
-  PLATFORM="$(platform_for_target "$TARGET")"
-  ARCH="$(arch_for_target "$TARGET")"
-  EXT="$(ext_for_target "$TARGET")"
-  PREFIX="$(prefix_for_target "$TARGET")"
+PROFILES=("$PROFILE")
+if [[ "$PROFILE" == "all" ]]; then
+  PROFILES=("debug" "release")
+fi
 
-  if [[ -z "$PLATFORM" || -z "$EXT" ]]; then
-    echo "Unsupported target: $TARGET" >&2
-    exit 1
+for P in "${PROFILES[@]}"; do
+  PROFILE_DIR="$P"
+  CARGO_PROFILE_ARGS=()
+  if [[ "$P" == "release" ]]; then
+    CARGO_PROFILE_ARGS+=("--release")
   fi
 
-  echo "== Building for $TARGET ($PLATFORM/$ARCH) [$PROFILE] =="
+  for TARGET in "${TARGETS[@]}"; do
+    PLATFORM="$(platform_for_target "$TARGET")"
+    ARCH="$(arch_for_target "$TARGET")"
+    EXT="$(ext_for_target "$TARGET")"
+    PREFIX="$(prefix_for_target "$TARGET")"
 
-  (cd "$SE_DIR" && cargo build -p se-ffi --target "$TARGET" "${CARGO_PROFILE_ARGS[@]}")
-  (cd "$WE_DIR" && cargo build -p webr-engine-ffi --target "$TARGET" "${CARGO_PROFILE_ARGS[@]}")
+    if [[ -z "$PLATFORM" || -z "$EXT" ]]; then
+      echo "Unsupported target: $TARGET" >&2
+      exit 1
+    fi
 
-  SE_OUT="$SE_DIR/target/$TARGET/$PROFILE_DIR/${PREFIX}se_ffi.$EXT"
-  WE_OUT="$WE_DIR/target/$TARGET/$PROFILE_DIR/${PREFIX}webr_engine.$EXT"
+    echo "== Building for $TARGET ($PLATFORM/$ARCH) [$P] =="
 
-  if [[ ! -f "$SE_OUT" ]]; then
-    echo "Missing output: $SE_OUT" >&2
-    exit 1
-  fi
-  if [[ ! -f "$WE_OUT" ]]; then
-    echo "Missing output: $WE_OUT" >&2
-    exit 1
-  fi
+    (cd "$SE_DIR" && cargo build -p se-ffi --target "$TARGET" "${CARGO_PROFILE_ARGS[@]}")
+    (cd "$WE_DIR" && cargo build -p webr-engine-ffi --target "$TARGET" "${CARGO_PROFILE_ARGS[@]}")
 
-  SE_DEST="$SE_PKG/Runtime/Plugins/$PLATFORM/$ARCH"
-  WE_DEST="$WE_PKG/Runtime/Plugins/$PLATFORM/$ARCH"
+    SE_OUT="$SE_DIR/target/$TARGET/$PROFILE_DIR/${PREFIX}se_ffi.$EXT"
+    WE_OUT="$WE_DIR/target/$TARGET/$PROFILE_DIR/${PREFIX}webr_engine.$EXT"
 
-  mkdir -p "$SE_DEST" "$WE_DEST"
-  cp "$SE_OUT" "$SE_DEST/"
-  cp "$WE_OUT" "$WE_DEST/"
+    if [[ ! -f "$SE_OUT" ]]; then
+      echo "Missing output: $SE_OUT" >&2
+      exit 1
+    fi
+    if [[ ! -f "$WE_OUT" ]]; then
+      echo "Missing output: $WE_OUT" >&2
+      exit 1
+    fi
 
-  echo "  -> $SE_DEST/$(basename "$SE_OUT")"
-  echo "  -> $WE_DEST/$(basename "$WE_OUT")"
-  echo
- done
+    SE_BASE="$SE_PKG/Runtime/Plugins/$PLATFORM/$ARCH"
+    WE_BASE="$WE_PKG/Runtime/Plugins/$PLATFORM/$ARCH"
+    if [[ "$P" == "release" ]]; then
+      SE_DEST="$SE_BASE"
+      WE_DEST="$WE_BASE"
+    else
+      SE_DEST="$SE_BASE/Debug"
+      WE_DEST="$WE_BASE/Debug"
+    fi
+
+    mkdir -p "$SE_DEST" "$WE_DEST"
+    cp "$SE_OUT" "$SE_DEST/"
+    cp "$WE_OUT" "$WE_DEST/"
+
+    echo "  -> $SE_DEST/$(basename "$SE_OUT")"
+    echo "  -> $WE_DEST/$(basename "$WE_OUT")"
+    echo
+  done
+done
 
 echo "Done."

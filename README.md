@@ -13,26 +13,36 @@ git clone --recurse-submodules git@github.com:herki18/yggdrasil.git
 
 ## Native plugin builds (Unity)
 
-Build scripts live in the repo root under `scripts/`:
+Build scripts live in the repo root under `scripts/`.
 
-### Scripting engine
+### Combined (both engines)
 **Windows (PowerShell):**
 ```powershell
-./scripts/scripting-engine/build-native.ps1 -Configuration All
+.\scripts\build-ffi.ps1 -Profile all
 ```
 
 **Linux/macOS (bash):**
 ```bash
+./scripts/build-ffi.sh --profile all
+```
+
+### Per-engine
+**Scripting engine (Windows):**
+```powershell
+.\scripts\scripting-engine\build-native.ps1 -Configuration All
+```
+
+**Scripting engine (Linux/macOS):**
+```bash
 ./scripts/scripting-engine/build-native.sh all
 ```
 
-### Web engine
-**Windows (PowerShell):**
+**Web engine (Windows):**
 ```powershell
-./scripts/web-engine/build-native.ps1 -Configuration All
+.\scripts\web-engine\build-native.ps1 -Configuration All
 ```
 
-**Linux/macOS (bash):**
+**Web engine (Linux/macOS):**
 ```bash
 ./scripts/web-engine/build-native.sh all
 ```
