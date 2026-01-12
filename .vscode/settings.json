@@ -1,0 +1,9 @@
+{
+  "workbench.editorAssociations": {
+    "*.md": "vscode.markdown.preview.editor",
+    "{git,gitlens,gitlens-git,vscode-diff}://**/*.md": "default",
+    "{git,gitlens,gitlens-git,vscode-diff}:/**/*.md": "default"
+  },
+  "markdown-preview-enhanced.automaticallyShowPreviewOfMarkdownBeingEdited": false,
+  "markdown-preview-enhanced.previewMode": "previewsOnly"
+}
