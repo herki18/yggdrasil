@@ -4,6 +4,7 @@
 [submodule "repos/scripting-engine-rust"]
 	path = repos/scripting-engine-rust
 	url = https://github.com/herki18/scripting-engine-rust
+	branch = feature/rust-style-ownership-model
 [submodule "repos/sunderia"]
 	path = repos/sunderia
 	url = https://github.com/herki18/sunderia
