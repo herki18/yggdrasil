@@ -1,2 +1,6 @@
 @echo off
-powershell -ExecutionPolicy Bypass -File "%~dp0build-ffi.ps1" %*
+echo build-ffi.cmd has been removed.
+echo Use one explicit script instead:
+echo   scripts\\build-scripting-engine-ffi.ps1
+echo   scripts\\build-web-engine-ffi.ps1
+exit /b 1

@@ -11,8 +11,8 @@ usage() {
 Usage: $(basename "$0") [--profile debug|release] [--linux] [--windows] [--linux-target <triple>] [--windows-target <triple>]
 
 Builds Linux and/or Windows FFI libs and copies them into the Unity packages.
-- Linux build uses scripts/build-ffi.sh
-- Windows build invokes scripts/build-ffi.ps1 via powershell.exe (WSL-friendly)
+- Linux build uses explicit per-engine scripts.
+- Windows build invokes explicit per-engine PowerShell scripts (WSL-friendly).
 
 Examples:
   $(basename "$0") --profile release
@@ -51,9 +51,11 @@ fi
 if $DO_LINUX; then
   echo "== Linux build =="
   if [[ -n "$LINUX_TARGET" ]]; then
-    "$ROOT_DIR/scripts/build-ffi.sh" --profile "$PROFILE" --target "$LINUX_TARGET"
+    "$ROOT_DIR/scripts/build-scripting-engine-ffi.sh" --profile "$PROFILE" --target "$LINUX_TARGET"
+    "$ROOT_DIR/scripts/build-web-engine-ffi.sh" --profile "$PROFILE" --target "$LINUX_TARGET"
   else
-    "$ROOT_DIR/scripts/build-ffi.sh" --profile "$PROFILE"
+    "$ROOT_DIR/scripts/build-scripting-engine-ffi.sh" --profile "$PROFILE"
+    "$ROOT_DIR/scripts/build-web-engine-ffi.sh" --profile "$PROFILE"
   fi
 fi
 
@@ -64,8 +66,10 @@ if $DO_WINDOWS; then
     exit 1
   fi
   WIN_ROOT="$(wslpath -w "$ROOT_DIR")"
-  WIN_SCRIPT="${WIN_ROOT}\\scripts\\build-ffi.ps1"
-  powershell.exe -ExecutionPolicy Bypass -File "$WIN_SCRIPT" -Profile "$PROFILE" -Target "$WINDOWS_TARGET"
+  WIN_SE_SCRIPT="${WIN_ROOT}\\scripts\\build-scripting-engine-ffi.ps1"
+  WIN_WE_SCRIPT="${WIN_ROOT}\\scripts\\build-web-engine-ffi.ps1"
+  powershell.exe -ExecutionPolicy Bypass -File "$WIN_SE_SCRIPT" -Profile "$PROFILE" -Target "$WINDOWS_TARGET"
+  powershell.exe -ExecutionPolicy Bypass -File "$WIN_WE_SCRIPT" -Profile "$PROFILE" -Target "$WINDOWS_TARGET"
 fi
 
 echo "All requested builds completed."
