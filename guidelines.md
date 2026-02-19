@@ -19,3 +19,7 @@
 - Delete legacy code, don't work around it
 - Rewrite modules that are fundamentally broken
 - Don't accumulate workarounds
+
+### Unity ECS
+- Do not use EntityManager when yo ucan avoid it. 
+- Use Unity ECS Jobs
