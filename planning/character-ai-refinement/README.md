@@ -12,6 +12,12 @@ architecture without touching production code paths.
   - End-to-end character runtime data flow (bootstrap, decision, execution, progression, persistence).
 - `AI_SYSTEM_REFINEMENT_PLAN.md`
   - AI architecture baseline and migration phases for utility + planner + task VM.
+- `SEMI_IDLE_CONTROL_MODEL.md`
+  - Semi-idle control architecture, arbitration rules, and smallest vertical slice with on-screen UX.
+- `FULL_ECS_RULES.md`
+  - Non-negotiable DOTS/ECS constraints, minimal ECS component/system order, and merge validation gates.
+- `SCRIPTING_ENGINE_ECS_INTEGRATION_PLAN.md`
+  - Verified scripting-engine integration points, block contracts, and smallest scripted character-to-screen slice.
 
 ## How to use this workspace
 
