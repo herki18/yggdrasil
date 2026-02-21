@@ -17,3 +17,6 @@
 [submodule "repos/web-scripting-bridge-unity"]
 	path = repos/web-scripting-bridge-unity
 	url = https://github.com/herki18/web-scripting-bridge-unity
+[submodule "repos/lundarr"]
+	path = repos/lundarr
+	url = https://github.com/herki18/lundarr

@@ -18,3 +18,4 @@ Keep root-level changes focused on orchestration (docs, scripts, CI), not produc
 - `repos/scripting-engine-rust`
 - `repos/web-engine-rust`
 - `repos/sunderia` (Unity project)
+- `repos/lundarr` (Unity project — idle dungeon RPG)
