@@ -2,7 +2,7 @@
 
 ## 1. Vision
 
-Lundarr is an MC-centric idle dungeon RPG for Steam PC. The player controls a single character who auto-loops through procedurally generated dungeons, growing stronger through a deep skill system and strategic ability configuration. Inspired by Lootun's auto-dungeon loop and built on a V3 Node Graph skill system that gives players meaningful build choices without manual combat execution.
+Lundarr is an MC-centric idle dungeon RPG for Steam PC. The player controls a single character trapped in a repeating descent through a single 100-floor dungeon. Floor 1 is a persistent camp where the player prepares for the next attempt. Inspired by Lootun's auto-dungeon loop and built on a V3 Node Graph skill system that gives players meaningful build choices without manual combat execution.
 
 **Core fantasy**: You are a dungeon delver who grows from clearing rat-infested cellars to conquering ancient vaults. Your power comes not from clicking faster, but from mastering the right skills, equipping the right abilities, and configuring the right strategies.
 
@@ -16,13 +16,11 @@ Lundarr is an MC-centric idle dungeon RPG for Steam PC. The player controls a si
 
 ```
 ┌──────────────────────────────────────────────┐
-│                  TOWN HUB                     │
-│  Train skills ← Equip abilities ← Manage gear │
+│            FLOOR 1 CAMP (PERSISTENT)         │
+│  Forge ← Dismantle ← Learn skills ← Loadout  │
 │         │                                      │
 │         ▼                                      │
-│    SELECT DUNGEON                              │
-│         │                                      │
-│         ▼                                      │
+│   DESCENT LOOP (FLOORS 2-100)                 │
 │  ┌─── AUTO-DUNGEON LOOP ────┐                 │
 │  │  Room → Combat → Loot    │                 │
 │  │    ↓                     │                 │
@@ -30,25 +28,27 @@ Lundarr is an MC-centric idle dungeon RPG for Steam PC. The player controls a si
 │  │    ↓                     │                 │
 │  │  Boss checkpoint         │                 │
 │  │    ↓                     │                 │
-│  │  Continue / retreat      │                 │
+│  │  Die / Retreat / Push    │                 │
 │  └──────────────────────────┘                 │
 │         │                                      │
-│         ▼                                      │
-│    REWARDS → Town                              │
+│   Death/Retreat -> Camp                        │
+│   Floor 100 clear -> Game End                  │
 └──────────────────────────────────────────────┘
 ```
 
 ### Session flow
-1. **Town phase**: Review character, train skills, equip ability cards, upgrade gear
-2. **Dungeon selection**: Choose dungeon tier and type (each has element/enemy themes)
-3. **Auto-dungeon**: Character automatically fights through rooms. Player watches, adjusts strategy mid-run if needed
+1. **Camp phase (Floor 1)**: Review character, craft, dismantle, learn skills, and set loadout
+2. **Run start (Floor 2+)**: Enter the dungeon descent from camp
+3. **Auto-dungeon**: Character automatically fights through rooms. Player watches and adjusts strategy mid-run if needed
 4. **Floor progression**: Clear rooms to reach floor boss. Beat boss to advance to next floor
-5. **Run end**: Character dies or retreats. Keep all loot and XP earned. Return to town
+5. **Run end**: Character dies or retreats. Return to Floor 1 Camp with persistent progression intact
+6. **Final objective**: Reach and clear Floor 100 to finish the game
 
 ### Idle mechanics
-- Runs continue while the game is open (auto-loop: town → dungeon → town)
+- Runs continue while the game is open (auto-loop: camp → descent → camp)
 - Offline progress: simplified simulation for time away (reduced loot rate)
 - No energy/stamina gates — play as much as desired
+- No NPC shop loop — progression comes from camp systems and dungeon loot
 
 ---
 
@@ -112,39 +112,41 @@ Each card contains:
 ## 4. Idle Dungeon Loop
 
 ### Dungeon structure
-- Each dungeon is a sequence of **floors**
-- Each floor contains **5-10 rooms** plus a **floor boss**
+- One primary dungeon with **100 floors total**
+- **Floor 1 is a safe persistent camp** (no combat)
+- Floors **2-99** contain **5-10 rooms** plus a **floor boss**
 - Rooms contain 1-3 enemy encounters
-- Every 5 floors: **boss checkpoint** (harder boss, better loot, acts as progress save)
+- Every 5 floors: **boss checkpoint** (harder boss, better loot)
+- **Floor 100 is the final encounter** and ends the game when cleared
 
 ### Room progression (Lootun-inspired)
 1. Enter room → enemies spawn
 2. Character auto-attacks using equipped ability cards
 3. AI evaluates ability cards each tick, executes highest-scoring valid ability
 4. Room cleared → loot drops → move to next room
-5. If character dies → run ends, keep all loot earned so far
+5. If character dies → run ends and returns to Floor 1 Camp
 
 ### Floor scaling
 - Enemy stats scale with floor number (linear base + exponential modifier)
-- Enemy types cycle through themed pools per dungeon
+- Enemy types shift through themed pools by floor band
 - Loot quality scales with floor depth
 - Boss floors have guaranteed drops from themed loot tables
 
-### Dungeon types
-- **Cellar**: Starting dungeon, undead/vermin theme
-- **Caverns**: Underground, earth/crystal theme
-- **Ruins**: Ancient, magical/construct theme
-- **Abyss**: Deep, shadow/demon theme
-- **Spire**: Vertical, elemental/boss rush theme
-- More unlocked through progression
+### Floor bands (single-dungeon theming)
+- **Floors 2-20**: Cellar (undead/vermin)
+- **Floors 21-40**: Caverns (earth/crystal)
+- **Floors 41-60**: Ruins (construct/arcane)
+- **Floors 61-80**: Abyss (shadow/demon)
+- **Floors 81-99**: Spire approach (elite gauntlet)
+- **Floor 100**: Final chamber
 
 ### Auto-loop
 When enabled, the character automatically:
-1. Finishes dungeon run (death or clear)
-2. Returns to town
-3. Auto-sells junk loot
-4. Re-enters the same dungeon
-5. Repeats until manually stopped
+1. Finishes dungeon run (death or retreat)
+2. Returns to Floor 1 Camp
+3. Performs configured camp actions (optional auto-dismantle/craft queue)
+4. Re-enters descent from camp
+5. Repeats until manually stopped or Floor 100 is cleared
 
 ---
 
@@ -168,19 +170,18 @@ Training is passive — skills improve through use during dungeon runs.
 - All equipment has rarity tiers: Common → Uncommon → Rare → Epic → Legendary
 - Equipment can be enchanted with modifiers from the node graph system
 
-### Prestige (Rebirth)
-- After reaching a milestone (e.g., floor 100), player can prestige
-- Resets: Floor progress, equipment, some skill levels
-- Keeps: Node unlocks, discovered skills, prestige currency
-- Prestige currency buys permanent upgrades: more ability slots, training speed, starting bonuses
-- Each prestige increases the overall power ceiling
+### Run reset model (no prestige cycles)
+- On death or retreat, run position resets back to Floor 1 Camp
+- Character development systems at camp persist between runs
+- Run-only combat state resets (HP/resource/cooldowns/temporary effects)
+- There is no rebirth cycle after Floor 100; clearing Floor 100 is the game completion state
 
-### Town upgrades
-- **Training grounds**: Passive skill training while idle
+### Camp systems (no shops)
 - **Forge**: Equipment crafting and enhancement
-- **Library**: Unlock new node combinations
-- **Guild hall**: Unlock new dungeon types
-- **Market**: Buy/sell equipment, trade materials
+- **Dismantler**: Break down loot into materials and knowledge fragments
+- **Research bench**: Unlock node combinations and passive bonuses
+- **Training ring**: Improve skill tracks between attempts
+- **Loadout board**: Configure abilities, equipment, and auto-loop behavior
 
 ---
 
@@ -235,7 +236,7 @@ The main UI is organized into tabs, accessible at all times:
 | **Dungeon** | Current dungeon view, combat log, auto-loop controls |
 | **Character** | Stats, equipment, inventory management |
 | **Abilities** | Node graph editor, skill list, ability card configuration |
-| **Town** | Town buildings, upgrades, NPC interactions |
+| **Camp** | Forge, dismantle, research, training, loadout prep |
 | **Settings** | Game settings, controls, accessibility options |
 
 ### UX principles
@@ -247,6 +248,7 @@ The main UI is organized into tabs, accessible at all times:
 
 ### Key UI components
 - **Dungeon HUD**: Floor/room counter, HP/MP bars, ability cooldowns, loot ticker
+- **Camp panel**: Crafting, dismantle queue, research unlocks, training actions
 - **Node graph canvas**: Zoomable, pannable graph editor with snap-to-grid
 - **Ability card tray**: Drag-and-drop card arrangement with quick-swap
 - **Equipment paper doll**: Visual character with equipment slots
@@ -350,11 +352,11 @@ PresentationSystemGroup
 ### Phase 7: Progression
 - Skill training (reps/technique/understanding)
 - Equipment enhancement
-- Town buildings (training grounds, forge, library)
-- Prestige system
+- Camp systems (forge, dismantler, research bench, training ring)
+- Run reset rules and camp persistence
 
 ### Phase 8: Content
-- Multiple dungeon types with themes
+- Single 100-floor dungeon bands with escalating themes
 - Enemy variety and scaling
 - Loot tables and equipment sets
 - Node/skill variety expansion
